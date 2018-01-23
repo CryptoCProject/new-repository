@@ -1,0 +1,9 @@
+*.jar
+*.bks
+*.jks
+*.xml
+*.mf
+/build
+/dist
+/nbproject
+/test
