@@ -17,6 +17,9 @@ public class Transaction implements Serializable{
 
     /** Matches number of transactions made by the sender **/
     private int nonce;
+    
+    private String fromId;
+    private String toId;
 
     /** Receiver's address **/
     private String to;
@@ -42,10 +45,10 @@ public class Transaction implements Serializable{
         this.reward = reward;
     }
 
-    public Transaction(String from, String to, double value, double reward) {
+    public Transaction(String fromId, String toId, double value, double reward) {
         this.id = String.valueOf(UUID.randomUUID());
-        this.from = from;
-        this.to = to;
+        this.fromId = fromId;
+        this.toId = toId;
         this.value = value;
         this.reward = reward;
     }
