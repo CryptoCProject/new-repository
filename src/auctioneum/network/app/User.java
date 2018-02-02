@@ -1,6 +1,6 @@
 package auctioneum.network.app;
 
-import auctioneum.Main;
+import auctioneum.RegulatorMain;
 import auctioneum.blockchain.Transaction;
 import auctioneum.smartcontracts.Auction;
 import auctioneum.database.Database;
@@ -382,8 +382,8 @@ public class User extends Thread {
                             }
                             
                             if (tr.getFrom() != null && tr.getTo() != null) {
-                                for(Node peer : Main.reg.getPeers()){
-                                    Main.reg.sendTransaction(tr, peer);
+                                for(Node peer : RegulatorMain.reg.getPeers()){
+                                    RegulatorMain.reg.sendTransaction(tr, peer);
                                 } 
                             }
                             
