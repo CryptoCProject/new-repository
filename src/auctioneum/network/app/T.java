@@ -1,5 +1,6 @@
 package auctioneum.network.app;
 
+import auctioneum.blockchain.Transaction;
 import auctioneum.smartcontracts.Auction;
 import auctioneum.smartcontracts.OpenAuction;
 import java.util.ArrayList;
@@ -10,12 +11,15 @@ import org.json.JSONObject;
 
 public class T {
     
+    public static double EXCHANGE_RATE;
+    
     public static final int PORT = 54321;
     public static final String CERT_PATH = "C:/Users/vagelis/Documents/NetBeansProjects/SSLserver/sslsec.jks";
     public static final long OTP_VALID_TIME = 180000; // 3 minutes
-    public static final long AUCTION_TIME = 10000; // 10 sec
+    public static final long AUCTION_TIME = 20000; // 20 sec
     public static final int NUMBER_OF_PARTICIPANTS = 1;
     public static HashMap<Integer, OpenAuction> AUCTIONS; // auctions are on
+    public static HashMap<String, Transaction> TRANSACTIONS = new HashMap(); // transactions
     
     public static String SUCCESS = "1";
     public static String NOT_SUCCESS = "2";
@@ -58,6 +62,19 @@ public class T {
     
     public static String CONNECT_AUCTION = " r";
     public static String CONNECT_AUCTION_CONFIRM = " s";
+    
+    public static String BID = " t";
+    public static String BID_CONFIRM = " u";
+    
+    public static String EXCHANGE = " v";
+    
+    public static String ADD_FUNDS = " w";
+    public static String ADD_FUNDS_CONFIRM = " x";
+    
+    public static String BALANCE = " y";
+    public static String BALANCE_CONFIRM = " z";
+    
+    public static String TRANSACTION = " 0";
     
     public static JSONObject getJson (String ... strings) {
         JSONObject jo = new JSONObject();

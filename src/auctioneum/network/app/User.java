@@ -1,23 +1,31 @@
 package auctioneum.network.app;
 
+import auctioneum.Main;
+import auctioneum.blockchain.Transaction;
 import auctioneum.smartcontracts.Auction;
 import auctioneum.database.Database;
+import auctioneum.network.app.T;
+import auctioneum.network.common.Node;
 import auctioneum.utils.otp.OtpStats;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.KeyPair;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.net.ssl.SSLSocket;
+import org.json.JSONException;
+import org.json.JSONObject;
 import auctioneum.utils.hashing.SHA_256;
 import auctioneum.utils.keys.Keys;
 import auctioneum.utils.otp.Otp;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 public class User extends Thread {
 
@@ -69,7 +77,7 @@ public class User extends Thread {
 
                 if (object instanceof String) {
                     String mes = (String) object;
-
+                    
                     // when User tries to sign up
                     if (mes.startsWith(T.SIGN_UP)) {
                         mes = mes.substring(2);
@@ -86,13 +94,13 @@ public class User extends Thread {
                                 String private_key = Base64.getEncoder().encodeToString(key_factory.getPrivateKey().getEncoded());
                                 this.sendMessage(T.PRIVATE_KEY + private_key);
                             }
-                        }
+                        } 
                         catch (Exception ex) {
                             ex.printStackTrace();
                             this.sendMessage(T.SIGN_UP_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-
+                    
                     // receive ACK for private key and sign up User
                     else if (mes.startsWith(T.PRIVATE_KEY)) {
                         mes = mes.substring(2);
@@ -107,7 +115,7 @@ public class User extends Thread {
                             }
                         }
                     }
-
+                    
                     // when user tries to log in
                     else if (mes.startsWith(T.LOG_IN)) {
                         mes = mes.substring(2);
@@ -142,7 +150,7 @@ public class User extends Thread {
                             this.sendMessage(T.LOG_IN_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-
+                    
                     // when user sends otp
                     else if (mes.startsWith(T.OTP)) {
                         mes = mes.substring(2);
@@ -176,7 +184,7 @@ public class User extends Thread {
                             this.sendMessage(T.OTP_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-
+                    
                     // when user create auction
                     else if (mes.startsWith(T.CREATE_AUCTION)) {
                         mes = mes.substring(2);
@@ -199,7 +207,7 @@ public class User extends Thread {
                             this.sendMessage(T.CREATE_AUCTION_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
-
+                    
                     // when user requests for open auctions
                     else if (mes.startsWith(T.OPEN_AUCTIONS)) {
                         mes = mes.substring(2);
@@ -217,7 +225,7 @@ public class User extends Thread {
                             this.sendMessage(T.OPEN_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
-
+                    
                     // when user requests for running auctions
                     else if (mes.startsWith(T.RUNNING_AUCTIONS)) {
                         mes = mes.substring(2);
@@ -237,7 +245,7 @@ public class User extends Thread {
                             this.sendMessage(T.RUNNING_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
-
+                    
                     // when user requests to participate
                     else if (mes.startsWith(T.PARTICIPATE)) {
                         mes = mes.substring(2);
@@ -257,7 +265,7 @@ public class User extends Thread {
                             this.sendMessage(T.PARTICIPATE_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-
+                    
                     // when user requests for continuous auction connection
                     else if (mes.startsWith(T.CONNECT_AUCTION)) {
                         mes = mes.substring(2);
@@ -285,13 +293,107 @@ public class User extends Thread {
                             this.sendMessage(T.CONNECT_AUCTION_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-
-                    // when user is in main
-                    else if (mes.startsWith(T.MAIN)) {
-                        Random r = new Random();
-                        this.sendMessage(T.MAIN_CONFIRM + "The lucky number is: " + r.nextInt(100));
+                    
+                    // when user bids
+                    else if (mes.startsWith(T.BID)) {
+                        mes = mes.substring(2);
+                        try {
+                            JSONObject jo = new JSONObject(mes);
+                            String participant_id = jo.getString("u");
+                            int auction_id = Integer.parseInt(jo.getString("i"));
+                            double price = Double.parseDouble(jo.getString("p"));
+                            if (db.insertBid(participant_id, auction_id, price)) {
+                                T.AUCTIONS.get(auction_id).sendBid(price);
+                            }
+                            else {
+                                this.sendMessage(T.BID_CONFIRM + T.NOT_SUCCESS);
+                            }
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                            this.sendMessage(T.BID_CONFIRM + T.NOT_SUCCESS);
+                        }
                     }
-
+                    
+                    // when user wants exchange rate
+                    else if (mes.startsWith(T.EXCHANGE)) {
+                        this.sendMessage(T.EXCHANGE + T.EXCHANGE_RATE);
+                    }
+                    
+                    else if (mes.startsWith(T.ADD_FUNDS)) {
+                        mes = mes.substring(2);
+                        try {
+                            JSONObject jo = new JSONObject(mes);
+                            String user_id = jo.getString("u");
+                            double money = jo.getDouble("m");
+                            
+                            if (db.setBalance(user_id, money)) {
+                                this.sendMessage(T.ADD_FUNDS_CONFIRM + T.SUCCESS);
+                            }
+                            else {
+                                this.sendMessage(T.ADD_FUNDS_CONFIRM + T.NOT_SUCCESS);
+                            }
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                            this.sendMessage(T.ADD_FUNDS_CONFIRM + T.NOT_SUCCESS);
+                        }
+                    }
+                    
+                    else if (mes.startsWith(T.BALANCE)) {
+                        mes = mes.substring(2);
+                        try {
+                            JSONObject jo = new JSONObject(mes);
+                            String user_id = jo.getString("u");
+                            
+                            double balance = db.getBalance(user_id, false);
+                            if (balance >= 0) {
+                                this.sendMessage(T.BALANCE_CONFIRM + balance);
+                            }
+                            else {
+                                this.sendMessage(T.BALANCE_CONFIRM + T.NOT_SUCCESS);
+                            }
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                            this.sendMessage(T.BALANCE_CONFIRM + T.NOT_SUCCESS);
+                        }
+                    }
+                    
+                    else if (mes.startsWith(T.TRANSACTION)) {
+                        mes = mes.substring(2);
+                        try {
+                            JSONObject jo = new JSONObject(mes);
+                            String user_id = jo.getString("i");
+                            String signature = jo.getString("s");
+                            String tr_id = jo.getString("t");
+                            String res = jo.getString("r");
+                            
+                            String puk = db.getPublicKey(user_id);
+                            Transaction tr = T.TRANSACTIONS.get(tr_id);
+                            
+                            if (res.equals("w")) {
+                                tr.setFrom(puk);
+                                tr.setSignatureFrom(signature);
+                            }
+                            else {
+                                tr.setTo(puk);
+                                tr.setSignatureTo(signature);
+                            }
+                            
+                            if (tr.getFrom() != null && tr.getTo() != null) {
+                                for(Node peer : Main.reg.getPeers()){
+                                    Main.reg.sendTransaction(tr, peer);
+                                } 
+                            }
+                            
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                            this.sendMessage(T.BALANCE_CONFIRM + T.NOT_SUCCESS);
+                        }
+                    }
+                    
                 }
 
             } catch (ClassNotFoundException ex) {
@@ -322,7 +424,7 @@ public class User extends Thread {
             ioe.printStackTrace();
         }
     }
-
+    
     public ObjectOutputStream getOut() {
         return this.out;
     }

@@ -1,23 +1,22 @@
 package auctioneum.smartcontracts;
 
-import auctioneum.network.app.T;
+import auctioneum.blockchain.Transaction;
 import auctioneum.network.app.T;
 import auctioneum.database.Database;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import auctioneum.network.app.User;
-import auctioneum.network.app.User;
 
 public class OpenAuction {
     
     private int auction_id;
     private String auctioneer_id;
+    private String winner_id;
+    private double final_price;
     private User auctioneer; // stream with auctioneer
     private ArrayList<User> participants; // streams with participants
     private Database db;
-    private String auctioneerPuk;
-    private String winnerPuk;
     private boolean finished;
     private boolean running;
 
@@ -73,7 +72,7 @@ public class OpenAuction {
                 for (User user : getParticipants()) {
                     sendMessage(T.CONNECT_AUCTION_CONFIRM + T.AUCTION_RUNNING, user.getOut());
                 }
-                new Timer(auction_id);
+                new Timer(auction_id).start();
                 return true;
             }
             else {
@@ -81,6 +80,14 @@ public class OpenAuction {
             }
         }
         return false;
+    }
+    
+    public boolean sendBid(double price) {
+        final_price = price;
+        for (User user : getParticipants()) {
+            sendMessage(T.BID_CONFIRM + T.SUCCESS + T.getJson(new String[]{"p", String.valueOf(price), "i", String.valueOf(auction_id)}), user.getOut());
+        }
+        return true;
     }
     
     private class Timer extends Thread {
@@ -99,9 +106,13 @@ public class OpenAuction {
                 ex.printStackTrace();
             }
             if (db.finishAuction(this.auction_id)) {
+                winner_id = db.getAuctionWinner(this.auction_id);
+                Transaction transaction = new Transaction(final_price, final_price+final_price*0.1);
+                T.TRANSACTIONS.put(transaction.getId(), transaction);
                 finished = true;
                 for (User user : getParticipants()) {
-                    sendMessage(T.CONNECT_AUCTION_CONFIRM + T.AUCTION_FINISHED, user.getOut());
+                    sendMessage(T.CONNECT_AUCTION_CONFIRM + T.AUCTION_FINISHED + 
+                            T.getJson(new String[]{"a", String.valueOf(auctioneer_id), "w", String.valueOf(winner_id), "t", transaction.toString(), "i", transaction.getId()}), user.getOut());
                 }
             }
         }

@@ -5,6 +5,7 @@ import auctioneum.utils.keys.RSA;
 
 import java.io.Serializable;
 import java.security.PublicKey;
+import java.util.UUID;
 
 
 public class Transaction implements Serializable{
@@ -24,23 +25,25 @@ public class Transaction implements Serializable{
     private String from;
 
     /** Amount to be transfered **/
-    private float value;
+    private double value;
 
     /** Amount to be paid for tx execution **/
-    private float reward;
+    private double reward;
 
-    /** Sender's signature **/
+    /** Transaction signature **/
     private String signatureFrom;
-
-    /** Receiver's signature **/
     private String signatureTo;
-
 
     public Transaction(){}
 
+    public Transaction(double value, double reward) {
+        this.id = String.valueOf(UUID.randomUUID());
+        this.value = value;
+        this.reward = reward;
+    }
 
-    public Transaction(String id, String from, String to, float value, float reward) {
-        this.id = id;
+    public Transaction(String from, String to, double value, double reward) {
+        this.id = String.valueOf(UUID.randomUUID());
         this.from = from;
         this.to = to;
         this.value = value;
@@ -80,17 +83,25 @@ public class Transaction implements Serializable{
         this.to = to;
     }
 
-    public float getValue() {
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public double getValue() {
         return this.value;
     }
 
-    public void setValue(float value) {
+    public void setValue(double value) {
         this.value = value;
     }
 
-    public float getReward() { return this.reward; }
+    public double getReward() { return this.reward; }
 
-    public void setReward(float reward) { this.reward = reward; }
+    public void setReward(double reward) { this.reward = reward; }
 
     public String getSignatureFrom() { return this.signatureFrom; }
 
@@ -107,6 +118,7 @@ public class Transaction implements Serializable{
         info += "\nFrom: "+ this.from;
         info += "\nTo: "+ this.to;
         info += "\nValue: "+ this.value;
+        info += "\nReward: "+ this.reward;
         return info;
     }
 

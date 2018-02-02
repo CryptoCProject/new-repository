@@ -12,6 +12,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import auctioneum.network.app.User;
+import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
 
 
 public class Database {
@@ -169,8 +171,8 @@ public class Database {
     
     public int insertAuction(String auction_type, String auctioneer_id, String object_name, double initial_price, User afc) {
         this.openDB();
-        String query = "INSERT INTO auction (auctioneer_id, auction_status, auction_type, initial_price, object_name) "
-                + "VALUES ('" + auctioneer_id + "', " + 0 + ", '" + auction_type + "', '" + initial_price + "', '" + object_name + "')";
+        String query = "INSERT INTO auction (auctioneer_id, auction_status, auction_type, initial_price, object_name, current_price) "
+                + "VALUES ('" + auctioneer_id + "', " + 0 + ", '" + auction_type + "', '" + initial_price + "', '" + object_name + "', '" + initial_price + "')";
         try {
             PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             stmt.executeUpdate();
@@ -217,11 +219,11 @@ public class Database {
     
     public ArrayList<Auction> getRunningAuctions(String id) {
         this.openDB();
-        String query = "SELECT auction_id, auctioneer_id, auction_type, initial_price, object_name " +
+        String query = "SELECT auction_id, auctioneer_id, auction_type, current_price, object_name " +
                         "FROM auction " +
                         "WHERE auctioneer_id = '" + id + "' AND auction_status = 1 " +
                         "UNION " +
-                        "SELECT a.auction_id, a.auctioneer_id, a.auction_type, a.initial_price, a.object_name " +
+                        "SELECT a.auction_id, a.auctioneer_id, a.auction_type, a.current_price, a.object_name " +
                         "FROM auction as a, participant as p " +
                         "WHERE a.auction_id = p.auction_id AND p.participant_id = '" + id + "' AND a.auction_status = 1;";
         try {
@@ -235,7 +237,7 @@ public class Database {
                 auction_id = rs.getInt("auction_id");
                 auctioneer_id = rs.getString("auctioneer_id");
                 auction_type = rs.getString("auction_type");
-                object_price = rs.getDouble("initial_price");
+                object_price = rs.getDouble("current_price");
                 object_name = rs.getString("object_name");
                 auctions.add(new Auction(auction_id, auctioneer_id, auction_type, object_price, object_name));
             }
@@ -293,6 +295,24 @@ public class Database {
         }
     }
     
+    public boolean insertBid(String participant_id, int auction_id, double price) {
+        this.openDB();
+        String query = "UPDATE auction "
+                + "SET current_price = " + price + ", "
+                + "bidder = '" + participant_id + "' "
+                + "WHERE auction_id = '" + auction_id + "'";
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+            this.closeDB();
+            return true;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            this.closeDB();
+            return false;
+        }
+    }
+    
     public boolean runAuction(int auction_id) {
         this.openDB();
         String query = "UPDATE auction SET auction_status = 1 WHERE auction_id = '" + auction_id + "'";
@@ -323,6 +343,25 @@ public class Database {
         }
     }
     
+    public String getAuctionWinner(int auction_id) {
+        this.openDB();
+        String query = "SELECT bidder FROM Auction WHERE auction_id = '" + auction_id + "'";
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            String winner = "";
+            while (rs.next()) {
+                winner = rs.getString("bidder");
+            }
+            this.closeDB();
+            return winner;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            this.closeDB();
+            return null;
+        }
+    }
+    
     public boolean insertMiner(String publicKey) {
         this.openDB();
         String query = "INSERT INTO Miner (public_key) VALUES ('" + publicKey + "')";
@@ -338,10 +377,9 @@ public class Database {
         }
     }
     
-    public double getBalance(String publicKey,boolean isMiner) {
+    public double getMinerBalance(String publicKey) {
         this.openDB();
-        String table = (isMiner)? "Miner" : "User";
-        String query = "SELECT balance FROM "+table+" WHERE public_key = '" + publicKey + "'";
+        String query = "SELECT balance FROM Miner WHERE public_key = '" + publicKey + "'";
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -357,6 +395,63 @@ public class Database {
             return -1;
         }
     }
-
-
+    
+    public boolean setBalance(String id, double money) {
+        this.openDB();
+        
+        double balance = this.getBalance(id, true);
+        String query = "UPDATE user SET balance = " + (balance+money*T.EXCHANGE_RATE) + " WHERE user_id = '" + id + "'";
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+            this.closeDB();
+            return true;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            this.closeDB();
+            return false;
+        }
+    }
+    
+    public double getBalance(String user_id, boolean db_open){
+        this.openDB();
+        String query = "SELECT balance FROM User WHERE user_id = '" + user_id + "'";
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            double balance = 0;
+            while (rs.next()) {
+                balance = rs.getDouble("balance");
+            }
+            if (!db_open) this.closeDB();
+            return balance;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            if (!db_open) this.closeDB();
+            return -1;
+        }
+    }
+    
+    
+    
+    public String getPublicKey(String user_id) {
+        this.openDB();
+        String query = "SELECT public_key FROM user WHERE user_id = '" + user_id + "'";
+        try {
+            String puk = "";
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                Blob bl = rs.getBlob("public_key");
+                puk = new String(bl.getBytes(1l, (int) bl.length()));
+            }
+            this.closeDB();
+            return puk;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            this.closeDB();
+            return null;
+        }
+    }
+    
 }
