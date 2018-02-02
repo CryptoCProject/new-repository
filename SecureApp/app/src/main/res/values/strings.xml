@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">SecureApp</string>
+    <string name="app_moto">SECURE AUCTION APPLICATION</string>
+
+    <!-- Strings related to login/Register -->
+    <string name="action_get_something">Get Something</string>
+    <string name="action_logout">Log out</string>
+    <string name="prompt_otp">OTP</string>
+    <string name="prompt_enter_otp">Please enter the OTP you received:</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="prompt_username">Username</string>
+    <string name="prompt_password">Password</string>
+    <string name="prompt_confirm_password">Confirm password</string>
+    <string name="prompt_email">Email</string>
+    <string name="action_register">Register</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_up">Sign up</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="no_account">No account yet? Create one</string>
+    <string name="already_account">Already have account? Sign in</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_otp">OtpActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <!-- MainActivity Menu Items -->
+    <string name="menu_profile">Profile</string>
+    <string name="menu_logout">Logout</string>
+
+    <!-- Auction Details-->
+    <string name="auction_object">Object: %s</string>
+    <string name="auction_auctioneer">Auctioneer ID: %s</string>
+    <string name="auction_price">Price: $%.2f</string>
+    <string name="auction_participate">Participate</string>
+
+    <!-- Create Auctions -->
+    <string name="create_auction_type">Choose Auction Type: </string>
+    <string name="create_auction_auctioneer">Auctioneer: </string>
+    <string name="create_auction_object">Object: </string>
+    <string name="create_auction_choose_object">Choose object</string>
+    <string name="create_auction_requirements">Requirements: </string>
+    <string name="create_auction_price">Initial Price: </string>
+    <string name="create_auction_participants">Minimum Participants: </string>
+    <string name="create_auction_duration">Duration: </string>
+    <string name="create_auction_submit">Submit</string>
+
+    <!-- Profile Page -->
+    <string name="profile_show_auctions">Show Auctions</string>
+    <string name="profile_add_funds">Add Funds</string>
+    <string name="profile_balance">Z $%.4f</string>
+
+    <!-- Broadcast Receivers -->
+    <string name="open_receiver">com.sec.secureapp.OPEN_AUCTIONS</string>
+    <string name="running_receiver">com.sec.secureapp.RUNNING_AUCTIONS</string>
+    <string name="finished_receiver">com.sec.secureapp.FINISHED_AUCTIONS</string>
+    <string name="bid_changed">com.sec.secureapp.BID_CHANGED</string>
+    <string name="funds_changed">com.sec.secureapp.FUNDS_CHANGED</string>
+
+    <!-- Dialogs -->
+    <string name="progress_dialog">Downloading data…</string>
+    <string name="please_wait">Please wait</string>
+    <string name="error">Error</string>
+    <string name="refresh">Refresh</string>
+    <string name="cancel">Cancel</string>
+    <string name="went_wrong">Something went wrong :(.. Please refresh.</string>
+    <string name="finished">Finished Auctions</string>
+    <string name="add_funds">Add Funds</string>
+    <string name="insert_amount">Insert the amount you wish: \n$ 1.00 -> Z $%.5f</string>
+
+    <!-- RecyclerView -->
+    <string name="no_auctions">There are no auctions available :(</string>
+
+</resources>
