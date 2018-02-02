@@ -44,7 +44,7 @@ public class Server <S extends Runnable>implements Runnable{
     @Override
     public void run() {
         try {
-            System.out.println("Server started at port "+listeningPort);
+            System.out.println(name+" started at port "+listeningPort);
             this.serverSocket = new ServerSocket(listeningPort);
             while (!stop) {
                 this.clientSocket = serverSocket.accept();

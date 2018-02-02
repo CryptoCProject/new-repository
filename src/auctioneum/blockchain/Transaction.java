@@ -29,9 +29,12 @@ public class Transaction implements Serializable{
     /** Amount to be paid for tx execution **/
     private float reward;
 
-    /** Transaction signature **/
+    /** Sender's signature **/
     private String signatureFrom;
+
+    /** Receiver's signature **/
     private String signatureTo;
+
 
     public Transaction(){}
 

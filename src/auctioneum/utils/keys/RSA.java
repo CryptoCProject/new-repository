@@ -37,10 +37,10 @@ public class RSA {
 
     public static PrivateKey getPrivateKeyFromString(String key) {
         try {
-            byte[] byteKey = Base64.getDecoder().decode(key.getBytes());
-            X509EncodedKeySpec X509privateKey = new X509EncodedKeySpec(byteKey);
+            byte[] byteKey = Base64.getDecoder().decode(key);
+            PKCS8EncodedKeySpec pkcs8PrivateKey = new PKCS8EncodedKeySpec(byteKey);
             KeyFactory kf = KeyFactory.getInstance("RSA");
-            return kf.generatePrivate(X509privateKey);
+            return kf.generatePrivate(pkcs8PrivateKey);
         } catch (Exception e) {
             e.printStackTrace();
         }

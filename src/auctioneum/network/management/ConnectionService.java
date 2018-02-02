@@ -40,7 +40,7 @@ public class ConnectionService implements Runnable{
                 ObjectOutputStream oos = new ObjectOutputStream(this.connection.getOutputStream());
                 //Connect to DB and return relative account
                 Database db = new Database();
-                double balance = db.getMinerBalance(pkToString);
+                double balance = db.getBalance(pkToString,false);
                 if (balance >= 0) {
                     Account account = new Account();
                     account.setBalance(balance);

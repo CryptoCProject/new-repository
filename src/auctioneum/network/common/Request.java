@@ -3,7 +3,6 @@ package auctioneum.network.common;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Optional;
 
 public class Request implements Serializable {
 

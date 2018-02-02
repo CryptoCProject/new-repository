@@ -2,27 +2,22 @@ package auctioneum.network.app;
 
 import auctioneum.smartcontracts.Auction;
 import auctioneum.database.Database;
-import auctioneum.network.app.T;
 import auctioneum.utils.otp.OtpStats;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.security.KeyPair;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import javax.net.ssl.SSLSocket;
-import org.json.JSONException;
-import org.json.JSONObject;
 import auctioneum.utils.hashing.SHA_256;
 import auctioneum.utils.keys.Keys;
 import auctioneum.utils.otp.Otp;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class User extends Thread {
 
@@ -74,7 +69,7 @@ public class User extends Thread {
 
                 if (object instanceof String) {
                     String mes = (String) object;
-                    
+
                     // when User tries to sign up
                     if (mes.startsWith(T.SIGN_UP)) {
                         mes = mes.substring(2);
@@ -91,13 +86,13 @@ public class User extends Thread {
                                 String private_key = Base64.getEncoder().encodeToString(key_factory.getPrivateKey().getEncoded());
                                 this.sendMessage(T.PRIVATE_KEY + private_key);
                             }
-                        } 
+                        }
                         catch (Exception ex) {
                             ex.printStackTrace();
                             this.sendMessage(T.SIGN_UP_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-                    
+
                     // receive ACK for private key and sign up User
                     else if (mes.startsWith(T.PRIVATE_KEY)) {
                         mes = mes.substring(2);
@@ -112,7 +107,7 @@ public class User extends Thread {
                             }
                         }
                     }
-                    
+
                     // when user tries to log in
                     else if (mes.startsWith(T.LOG_IN)) {
                         mes = mes.substring(2);
@@ -147,7 +142,7 @@ public class User extends Thread {
                             this.sendMessage(T.LOG_IN_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-                    
+
                     // when user sends otp
                     else if (mes.startsWith(T.OTP)) {
                         mes = mes.substring(2);
@@ -181,7 +176,7 @@ public class User extends Thread {
                             this.sendMessage(T.OTP_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-                    
+
                     // when user create auction
                     else if (mes.startsWith(T.CREATE_AUCTION)) {
                         mes = mes.substring(2);
@@ -204,7 +199,7 @@ public class User extends Thread {
                             this.sendMessage(T.CREATE_AUCTION_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
-                    
+
                     // when user requests for open auctions
                     else if (mes.startsWith(T.OPEN_AUCTIONS)) {
                         mes = mes.substring(2);
@@ -222,7 +217,7 @@ public class User extends Thread {
                             this.sendMessage(T.OPEN_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
-                    
+
                     // when user requests for running auctions
                     else if (mes.startsWith(T.RUNNING_AUCTIONS)) {
                         mes = mes.substring(2);
@@ -242,7 +237,7 @@ public class User extends Thread {
                             this.sendMessage(T.RUNNING_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
-                    
+
                     // when user requests to participate
                     else if (mes.startsWith(T.PARTICIPATE)) {
                         mes = mes.substring(2);
@@ -262,7 +257,7 @@ public class User extends Thread {
                             this.sendMessage(T.PARTICIPATE_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-                    
+
                     // when user requests for continuous auction connection
                     else if (mes.startsWith(T.CONNECT_AUCTION)) {
                         mes = mes.substring(2);
@@ -290,13 +285,13 @@ public class User extends Thread {
                             this.sendMessage(T.CONNECT_AUCTION_CONFIRM + T.NOT_SUCCESS);
                         }
                     }
-                    
+
                     // when user is in main
                     else if (mes.startsWith(T.MAIN)) {
                         Random r = new Random();
                         this.sendMessage(T.MAIN_CONFIRM + "The lucky number is: " + r.nextInt(100));
                     }
-                    
+
                 }
 
             } catch (ClassNotFoundException ex) {
@@ -327,7 +322,7 @@ public class User extends Thread {
             ioe.printStackTrace();
         }
     }
-    
+
     public ObjectOutputStream getOut() {
         return this.out;
     }

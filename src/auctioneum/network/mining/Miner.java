@@ -1,6 +1,5 @@
 package auctioneum.network.mining;
 
-import auctioneum.blockchain.Account;
 import auctioneum.blockchain.Block;
 import auctioneum.blockchain.Transaction;
 import auctioneum.network.common.Node;
@@ -10,13 +9,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
-public class Miner extends Node {
+public class Miner extends Node{
 
     private Map<Thread,MiningProcess> miningProcesses;
 
-    public Miner(Account account){
-        super(account);
+    private final int MIN_TX_NUM = 1;
+    private final int DEFAULT_DIFFICULTY = 4;
+
+    public Miner(){
         this.miningProcesses = new HashMap<>();
     }
 
@@ -38,8 +41,8 @@ public class Miner extends Node {
      * @param block
      * @return
      */
-    private void mine(Block block, int difficulty){
-        MiningProcess miningProcess = new MiningProcess(block,difficulty);
+    private void mine(Block block){
+        MiningProcess miningProcess = new MiningProcess(block,block.getDifficulty());
         Thread miningService = new Thread(miningProcess);
         miningService.start();
         this.miningProcesses.put(miningService,miningProcess);
@@ -70,14 +73,15 @@ public class Miner extends Node {
         }
     }
 
-    @Override
-    public void connect(){
 
-
+    public void startMining(){
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        Thread miningStrategy = new Thread(()-> {
+            if(this.getTxPool().size() >= MIN_TX_NUM) {
+                this.mine(this.createBlock(MIN_TX_NUM, DEFAULT_DIFFICULTY));
+            }
+        });
     }
-
-
-    public void start(){}
 
 
 }

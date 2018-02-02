@@ -37,17 +37,6 @@ public class Regulator extends Node{
         connectionService.start();
     }
 
-//    public Regulator(Account account){
-//        super(account);
-//        advertisedPeers = new TreeMap<>();
-//        connectionServer = new Server<ConnectionService>(this,Settings.CONNECTION_PORT,"ConnectionServer",ConnectionService.class);
-//        registrationServer = new Server<RegisterService>(this,Settings.REGISTRATION_PORT,"RegistrationServer",RegisterService.class);
-//        Thread connectionService = new Thread(connectionServer);
-//        Thread registrationService = new Thread(registrationServer);
-//        registrationService.start();
-//        connectionService.start();
-//    }
-
 
     public void addPeer(InetAddress ip, Account ac){
         Node peer = new Node();

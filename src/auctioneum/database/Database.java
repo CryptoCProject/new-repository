@@ -338,9 +338,10 @@ public class Database {
         }
     }
     
-    public double getMinerBalance(String publicKey) {
+    public double getBalance(String publicKey,boolean isMiner) {
         this.openDB();
-        String query = "SELECT balance FROM Miner WHERE public_key = '" + publicKey + "'";
+        String table = (isMiner)? "Miner" : "User";
+        String query = "SELECT balance FROM "+table+" WHERE public_key = '" + publicKey + "'";
         try {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -356,4 +357,6 @@ public class Database {
             return -1;
         }
     }
+
+
 }

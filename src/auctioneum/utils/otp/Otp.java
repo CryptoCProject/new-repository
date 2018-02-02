@@ -1,18 +1,9 @@
 package auctioneum.utils.otp;
 
 import auctioneum.utils.hashing.SHA_256;
-import com.sun.mail.util.MailSSLSocketFactory;
-import java.security.GeneralSecurityException;
+
 import java.util.Properties;
 import java.util.Random;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 /**
  *
  * @author Dimitris
@@ -47,36 +38,37 @@ public class Otp {
     }
 
     public boolean sendMail() {
-        try {
-            Properties props = new Properties();
-            props.put("mail.smtp.host", "smtp.gmail.com");
-            props.put("mail.smtp.socketFactory.port", "587");
-            MailSSLSocketFactory sf = new MailSSLSocketFactory();
-            sf.setTrustAllHosts(true);
-            props.put("mail.smtp.ssl.socketFactory", sf);
-            props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.port", "587");
-
-            Session session = Session.getDefaultInstance(props,
-                    new javax.mail.Authenticator() {
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication("panos.zafeiratos@gmail.com", "12345678!");
-                }
-            });
-
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("panos.zafeiratos@gmail.com"));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-            message.setSubject("OTP message");
-            message.setText("Your OTP is: " + otp);
-            Transport.send(message);
-            System.out.println("koukouroukou");
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+//        try {
+//            Properties props = new Properties();
+//            props.put("mail.smtp.host", "smtp.gmail.com");
+//            props.put("mail.smtp.socketFactory.port", "587");
+//            MailSSLSocketFactory sf = new MailSSLSocketFactory();
+//            sf.setTrustAllHosts(true);
+//            props.put("mail.smtp.ssl.socketFactory", sf);
+//            props.put("mail.smtp.auth", "true");
+//            props.put("mail.smtp.starttls.enable", "true");
+//            props.put("mail.smtp.port", "587");
+//
+//            Session session = Session.getDefaultInstance(props,
+//                    new javax.mail.Authenticator() {
+//                protected PasswordAuthentication getPasswordAuthentication() {
+//                    return new PasswordAuthentication("panos.zafeiratos@gmail.com", "12345678!");
+//                }
+//            });
+//
+//            Message message = new MimeMessage(session);
+//            message.setFrom(new InternetAddress("panos.zafeiratos@gmail.com"));
+//            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
+//            message.setSubject("OTP message");
+//            message.setText("Your OTP is: " + otp);
+//            Transport.send(message);
+//            System.out.println("koukouroukou");
+//            return true;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+        return false;
     }
 
     public String getOtp() {

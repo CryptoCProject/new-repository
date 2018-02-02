@@ -6,14 +6,12 @@ import auctioneum.blockchain.BlockChain;
 import auctioneum.blockchain.Transaction;
 import auctioneum.utils.files.FileManager;
 import auctioneum.utils.keys.RSA;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 public class Node implements Serializable{
@@ -25,10 +23,10 @@ public class Node implements Serializable{
     private BlockChain blockChain;
 
     /** Transaction Pool **/
-    private List<Transaction> txPool;
+    private transient List<Transaction> txPool;
 
     /** Node's peers **/
-    private List<Node> peers;
+    private transient List<Node> peers;
 
     /** The ip address of the logged node **/
     private InetAddress ip;
@@ -40,22 +38,19 @@ public class Node implements Serializable{
     private int validationsPort;
 
     /** Server that handles the incoming blocks for validation **/
-    private Server validationServer;
+    private transient Server validationServer;
 
     /** Server for receiving transactions **/
-    private Server transactionServer;
+    private transient Server transactionServer;
 
     /** Stores/Retrieves files stored in the node's disk **/
-    private FileManager fileManager;
+    private transient FileManager fileManager;
 
 
-    public Node(){}
-
-    public Node(Account account){
+    public Node(){
         this.ip = Settings.IP;
         this.validationsPort = Settings.VALIDATIONS_PORT;
         this.transactionsPort = Settings.TRANSACTIONS_PORT;
-        this.account = account;
         this.fileManager = new FileManager();
         this.peers = Settings.PEERS;
         this.validationServer = new Server<ValidationService>(this,this.validationsPort,"VdsServer",ValidationService.class);
@@ -70,13 +65,10 @@ public class Node implements Serializable{
         try{
             Channel<String> channel = new Channel<>();
             Request request = new Request(Request.REGISTER,null);
-            InetAddress serverIP = InetAddress.getByName("zafeiratos.ddns.net");
-            int port = 54321;
-            List<String> keys = channel.getDataOnce(request,serverIP,port);
-            for(String key: keys){
-                FileManager.storeToDisk("PublicKey",key);
-                FileManager.storeToDisk("PrivateKey",key);
-            }
+            int port = Settings.REGISTRATION_PORT;
+            List<String> keys = channel.getDataOnce(request,InetAddress.getLocalHost(),port);
+            FileManager.storeToDisk("PublicKey",keys.get(0));
+            FileManager.storeToDisk("PrivateKey",keys.get(1));
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -88,8 +80,19 @@ public class Node implements Serializable{
             String signedServiceType = RSA.sign(Request.CONNECT,RSA.getPrivateKeyFromString(FileManager.readFile("PrivateKey")));
             List<String> params = new ArrayList<>();
             params.add(FileManager.readFile("PublicKey"));
+            params.add(String.valueOf(Settings.TRANSACTIONS_PORT));
+            params.add(String.valueOf(Settings.VALIDATIONS_PORT));
             Request request = new Request(signedServiceType,params);
-            this.setAccount(channel.getDataOnce(request,InetAddress.getByName("zafeiratos.ddns.net"),54321).get(0));
+            List<List<Object>> connectionData = channel.getData(request,Settings.REGULATOR_IP,Settings.CONNECTION_PORT);
+            Account account = (Account) connectionData.get(0).get(0);
+            this.setAccount(account);
+            List<Node> peers = new ArrayList<>();
+            for(Object obj: connectionData.get(1)){
+                Node peer = (Node) obj;
+                peers.add(peer);
+            }
+            this.setPeers(peers);
+            System.out.println(account);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -138,7 +141,7 @@ public class Node implements Serializable{
 
     public void addBlock(Block block){
         synchronized (this.blockChain){
-                this.blockChain.add(block);
+            this.blockChain.add(block);
         }
     }
 
@@ -254,6 +257,17 @@ public class Node implements Serializable{
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof Node) {
+            boolean sameIP = this.getIp().equals(((Node)o).getIp());
+            boolean samePublicKey = this.getAccount().getAddress().equals(((Node)o).getAccount().getAddress());
+            if(sameIP && samePublicKey){
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public int hashCode() {

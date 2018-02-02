@@ -106,4 +106,13 @@ public class Block implements Serializable{
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
     }
+
+
+    public int getDifficulty() {
+        return this.difficulty;
+    }
+
+    public void setDifficulty(int difficulty) {
+        this.difficulty = difficulty;
+    }
 }
