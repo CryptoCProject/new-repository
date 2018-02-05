@@ -4,14 +4,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.util.Base64;
 
 public class DB extends SQLiteOpenHelper {
 
@@ -77,7 +83,7 @@ public class DB extends SQLiteOpenHelper {
 
     public PrivateKey getPrivateKey(String name) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String sql = "SELECT privateKey FROM Keys WHERE name="+name;
+        String sql = "SELECT privateKey FROM Keys WHERE name='"+name+"'";
         Cursor cursor = db.rawQuery(sql, new String[] {});
 
         byte[] pk = null;
@@ -92,23 +98,35 @@ public class DB extends SQLiteOpenHelper {
             return null;
         }
         else {
-            try{
-                File pkf = File.createTempFile("private", ".key");
-                FileOutputStream outputStream = new FileOutputStream(pkf);
-                outputStream.write(pk);
-                outputStream.close();
-                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(pkf));
-                PrivateKey privateKey = (PrivateKey) inputStream.readObject();
-                inputStream.close();
-                db.close();
-                cursor.close();
+
+            try {
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                PrivateKey privateKey = kf.generatePrivate(new PKCS8EncodedKeySpec(Base64.decode(pk, Base64.NO_WRAP)));
                 return privateKey;
-            }catch(Exception e){
+            } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
-                db.close();
-                cursor.close();
-                return null;
+            } catch (InvalidKeySpecException e) {
+                e.printStackTrace();
             }
+            return null;
+
+//            try{
+//                File pkf = File.createTempFile("private", ".key");
+//                FileOutputStream outputStream = new FileOutputStream(pkf);
+//                outputStream.write(pk);
+//                outputStream.close();
+//                ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(pkf));
+//                PrivateKey privateKey = (PrivateKey) inputStream.readObject();
+//                inputStream.close();
+//                db.close();
+//                cursor.close();
+//                return privateKey;
+//            }catch(Exception e){
+//                e.printStackTrace();
+//                db.close();
+//                cursor.close();
+//                return null;
+//            }
         }
     }
 

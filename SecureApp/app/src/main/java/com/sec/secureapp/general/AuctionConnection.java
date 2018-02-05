@@ -40,9 +40,9 @@ public class AuctionConnection extends Thread {
                 else if (T.CONNECT_AUCTION_MESSAGE.startsWith(T.AUCTION_RUNNING)) {
                     T.VIEW_TOAST(this.context, "Auction " + this.auction_id  + " started!!!", Toast.LENGTH_LONG);
                 }
-                else if (T.CONNECT_AUCTION_MESSAGE.equals(T.AUCTION_FINISHED)) {
+                else if (T.CONNECT_AUCTION_MESSAGE.startsWith(T.AUCTION_FINISHED)) {
                     T.VIEW_TOAST(this.context, "Auction " + this.auction_id  + " finished!!!", Toast.LENGTH_LONG);
-                    String id = T.CONNECT_AUCTION_MESSAGE.substring(4);
+                    String id = T.CONNECT_AUCTION_MESSAGE.substring(2);
                     try {
                         JSONObject jsonObject = new JSONObject(id);
                         String auctioneer_id = jsonObject.getString("a");
@@ -53,7 +53,7 @@ public class AuctionConnection extends Thread {
                             String signature = Keys.sign(transaction, T.DB.getPrivateKey(T.USER_ID));
                             client.sendMessage(T.TRANSACTION + T.getJson(new String[]{"r", "a", "s", signature, "i", T.USER_ID, "t", tr_id}).toString());
                         }
-                        else if (T.USER_ID.equals(winner_id)) {
+                        if (T.USER_ID.equals(winner_id)) {
                             String signature = Keys.sign(transaction, T.DB.getPrivateKey(T.USER_ID));
                             client.sendMessage(T.TRANSACTION + T.getJson(new String[]{"r", "w", "s", signature, "i", T.USER_ID, "t", tr_id}).toString());
                         }
@@ -66,7 +66,7 @@ public class AuctionConnection extends Thread {
                     T.VIEW_TOAST(this.context, "Server not responding . Try again please.", Toast.LENGTH_LONG);
                     break;
                 }
-                T.CONNECT_AUCTION_MESSAGE = null;
+                //T.CONNECT_AUCTION_MESSAGE = null;
             }
         }
         this.client.closeCrap();

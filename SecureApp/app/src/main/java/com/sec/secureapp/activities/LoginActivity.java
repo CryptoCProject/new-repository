@@ -27,6 +27,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         T.DB = new DB(this);
 
+        //T.USER_ID = "gcxbFwGGdLQBtC81uge7eeIRI5wjv/5ljaFXfj5kaHc=";
+        //T.DB.getPrivateKey(T.USER_ID);
+
     }
 
     @Override

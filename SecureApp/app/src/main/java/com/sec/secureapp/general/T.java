@@ -18,11 +18,11 @@ import java.util.HashMap;
 public class T {
 
     public static DB DB;
-    public static String USER_ID = "gcxbFwGGdLQBtC81uge7eeIRI5wjv/5ljaFXfj5kaHc=";
+    public static String USER_ID;// = "gcxbFwGGdLQBtC81uge7eeIRI5wjv/5ljaFXfj5kaHc=";
     //public static String USER_ID = "Yb5VqOL2tOFyM4vd8YTW2+4pyYhT4KBIXs7n8nua8LQ=";
     public static AuctionConnection AC;
 
-    public static String SERVER_IP = "zafeiratosv.ddns.net";//"zafeiratosv.ddns.net";
+    public static String SERVER_IP = "192.168.1.3";//"zafeiratosv.ddns.net";//"zafeiratosv.ddns.net";
     public static int SERVER_PORT = 54321;
     public static String CERT_NAME = "sslsec.bks";
 
