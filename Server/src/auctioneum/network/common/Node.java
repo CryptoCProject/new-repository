@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -20,7 +21,7 @@ public class Node implements Serializable{
     private Account account;
 
     /** Blockchain copy **/
-    private BlockChain blockChain;
+    private transient BlockChain blockChain;
 
     /** Transaction Pool **/
     private transient List<Transaction> txPool;
@@ -56,7 +57,7 @@ public class Node implements Serializable{
         this.validationServer = new Server<ValidationService>(this,this.validationsPort,"VdsServer",ValidationService.class);
         this.transactionServer = new Server<TransactionService>(this, this.transactionsPort,"TxsServer",TransactionService.class);
         this.blockChain = this.updateCopy();
-        this.txPool = new ArrayList<>();
+        this.txPool = Collections.synchronizedList(new ArrayList<>());
     }
 
     /**----------------------------------- Network ----------------------------------**/
@@ -113,11 +114,13 @@ public class Node implements Serializable{
                     for (Transaction validatedTx : txs) {
                         this.txPool.add(validatedTx);
                     }
+                    break;
                 }
                 case "remove":{
                     for (Transaction validatedTx : txs) {
                         this.txPool.remove(validatedTx);
                     }
+                    break;
                 }
             }
         }
@@ -143,6 +146,7 @@ public class Node implements Serializable{
         synchronized (this.blockChain){
             this.blockChain.add(block);
         }
+
     }
 
     public void sendForValidation(Block block, Node target){
@@ -162,7 +166,7 @@ public class Node implements Serializable{
 
     /**--------------------------------- Blockchain ---------------------------------**/
 
-    public BlockChain updateCopy(){return null;}
+    public BlockChain updateCopy(){return new BlockChain();}
 
 
     /**

@@ -11,8 +11,8 @@ public class NodeMain {
         try {
             Node self = new Node();
             self.connect();
-            //self.startTxServer();
-            //self.startVdnServer();
+            self.startTxServer();
+            self.startVdnServer();
         }catch (Exception e){
             e.printStackTrace();
         }

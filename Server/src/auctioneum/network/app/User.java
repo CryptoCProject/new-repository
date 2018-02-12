@@ -217,7 +217,7 @@ public class User extends Thread {
                                 this.sendMessage(T.OPEN_AUCTIONS_CONFIRM + T.getJsonArrayAuctions(auctions));
                             }
                             else {
-                                this.sendMessage(T.OPEN_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
+                                this.sendMessage(T.OPEN_AUCTIONS_CONFIRM + T.AUCTION_EMPTY);
                             }
                         }
                         catch (Exception ex) {
@@ -237,12 +237,32 @@ public class User extends Thread {
                                 this.sendMessage(T.RUNNING_AUCTIONS_CONFIRM + T.getJsonArrayAuctions(auctions));
                             }
                             else {
-                                this.sendMessage(T.RUNNING_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
+                                this.sendMessage(T.RUNNING_AUCTIONS_CONFIRM + T.AUCTION_EMPTY);
                             }
                         }
                         catch (Exception ex) {
                             ex.printStackTrace();
                             this.sendMessage(T.RUNNING_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
+                        }
+                    }
+
+                    // when user requests for finished auctions
+                    else if (mes.startsWith(T.FINISHED_AUCTIONS)) {
+                        mes = mes.substring(2);
+                        try {
+                            JSONObject jo = new JSONObject(mes);
+                            String id = jo.getString("u");
+                            ArrayList<Auction> auctions = db.getFinishedAuctions(id);
+                            if (!auctions.isEmpty()) {
+                                this.sendMessage(T.FINISHED_AUCTIONS_CONFIRM + T.getJsonArrayAuctions(auctions));
+                            }
+                            else {
+                                this.sendMessage(T.FINISHED_AUCTIONS_CONFIRM + T.AUCTION_EMPTY);
+                            }
+                        }
+                        catch (Exception ex) {
+                            ex.printStackTrace();
+                            this.sendMessage(T.FINISHED_AUCTIONS_CONFIRM + T.AUCTION_ERROR);
                         }
                     }
                     
@@ -360,42 +380,75 @@ public class User extends Thread {
                         }
                     }
                     
-                    else if (mes.startsWith(T.TRANSACTION)) {
-                        mes = mes.substring(2);
-                        try {
-                            JSONObject jo = new JSONObject(mes);
-                            String user_id = jo.getString("i");
-                            String signature = jo.getString("s");
-                            String tr_id = jo.getString("t");
-                            String res = jo.getString("r");
-                            
-                            String puk = db.getPublicKey(user_id);
-                            Transaction tr = T.TRANSACTIONS.get(tr_id);
-                            
-                            if (res.equals("w")) {
-                                tr.setFrom(puk);
-                                tr.setSignatureFrom(signature);
-                            }
-                            if (res.equals("a")) {
-                                tr.setTo(puk);
-                                tr.setSignatureTo(signature);
-                            }
-                            if (tr.getFrom() != null && tr.getTo() != null) {
-                                System.out.println("---------------MALAKAS----------------------");
-                                for(Node peer : RegulatorMain.reg.getPeers()){
-                                    RegulatorMain.reg.sendTransaction(tr, peer);
-                                }
-                            }
-                            
-                        }
-                        catch (Exception ex) {
-                            ex.printStackTrace();
-                            this.sendMessage(T.BALANCE_CONFIRM + T.NOT_SUCCESS);
-                        }
-                    }
+//                    else if (mes.startsWith(T.TRANSACTION)) {
+//                        mes = mes.substring(2);
+//                        try {
+//                            JSONObject jo = new JSONObject(mes);
+//                            String user_id = jo.getString("i");
+//                            String signature = jo.getString("s");
+//                            String tr_id = jo.getString("t");
+//                            String res = jo.getString("r");
+//
+//                            String puk = db.getPublicKey(user_id);
+//                            Transaction tr = T.TRANSACTIONS.get(tr_id);
+//
+//                            if (res.equals("w")) {
+//                                tr.setFrom(puk);
+//                                tr.setSignatureFrom(signature);
+//                            }
+//                            if (res.equals("a")) {
+//                                tr.setTo(puk);
+//                                tr.setSignatureTo(signature);
+//                            }
+//                            if (tr.getFrom() != null && tr.getTo() != null) {
+//                                System.out.println("---------------AUCTION FINISHED----------------------");
+//                                for(Node peer : RegulatorMain.reg.getAdvertisedPeers()){
+//                                    System.out.println("Sending transaction to "+peer.getIp()+":"+peer.getTransactionsPort());
+//                                    RegulatorMain.reg.sendTransaction(tr, peer);
+//                                    System.out.println("Sent successfully");
+//                                }
+//                            }
+//
+//                        }
+//                        catch (Exception ex) {
+//                            ex.printStackTrace();
+//                            this.sendMessage(T.BALANCE_CONFIRM + T.NOT_SUCCESS);
+//                        }
+//                    }
                     
                 }
 
+                else if(object instanceof Transaction) {
+                    Transaction trTemp = (Transaction) object;
+                    Transaction tr;
+
+                    if (trTemp.getFromId() != null) {
+                        tr = T.TRANSACTIONS.get(trTemp.getId());
+                        tr.setFrom(db.getPublicKey(trTemp.getFromId()));
+                        tr.setSignatureFrom(trTemp.getSignatureFrom());
+                    }
+                    else {
+                        tr = T.TRANSACTIONS.get(trTemp.getId());
+                        tr.setTo(db.getPublicKey(trTemp.getToId()));
+                        tr.setSignatureTo(trTemp.getSignatureTo());
+                    }
+
+                    if (tr.getFrom() != null && tr.getTo() != null) {
+                        for(Node peer : RegulatorMain.reg.getAdvertisedPeers()){
+                            System.out.println("Sending transaction to "+peer.getIp()+":"+peer.getTransactionsPort());
+                            RegulatorMain.reg.sendTransaction(tr, peer);
+                            System.out.println("Sent successfully");
+                        }
+                    }
+//                    tr.setFrom(db.getPublicKey(tr.getFromId()));
+//                    tr.setTo(db.getPublicKey(tr.getToId()));
+//                    System.out.println("---------------MALAKAS----------------------");
+//                    for(Node peer : RegulatorMain.reg.getAdvertisedPeers()){
+//                        System.out.println("Sending transaction to "+peer.getIp()+":"+peer.getTransactionsPort());
+//                        RegulatorMain.reg.sendTransaction(tr, peer);
+//                        System.out.println("Sent successfully");
+//                    }
+                }
             } catch (ClassNotFoundException ex) {
                 System.out.println("Message: " + "Class not found exception ");
                 ex.printStackTrace();

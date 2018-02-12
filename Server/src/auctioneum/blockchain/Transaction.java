@@ -1,6 +1,5 @@
 package auctioneum.blockchain;
 
-import auctioneum.utils.hashing.SHA3_256;
 import auctioneum.utils.keys.RSA;
 
 import java.io.Serializable;
@@ -17,8 +16,9 @@ public class Transaction implements Serializable{
 
     /** Matches number of transactions made by the sender **/
     private int nonce;
-    
+
     private String fromId;
+
     private String toId;
 
     /** Receiver's address **/
@@ -35,6 +35,7 @@ public class Transaction implements Serializable{
 
     /** Transaction signature **/
     private String signatureFrom;
+
     private String signatureTo;
 
     public Transaction(){}
@@ -53,17 +54,24 @@ public class Transaction implements Serializable{
         this.reward = reward;
     }
 
+    public Transaction(String id, String fromId, String toId, String signature) {
+        this.id = id;
+        this.fromId = fromId;
+        this.toId = toId;
+        if (fromId != null) this.signatureFrom = signature;
+        else this.signatureTo = signature;
+    }
+
     /**
      * Checks if a transaction is valid
      * @return
      */
     public boolean isValid(){
-        String transactionHash = SHA3_256.hash(this.toString());
         PublicKey senderKey = RSA.getPublicKeyFromString(this.from);
         PublicKey receiverKey = RSA.getPublicKeyFromString(this.to);
-        boolean senderSignatureIsValid = RSA.verify(transactionHash, this.signatureFrom, senderKey);
-        boolean receiverSignatureIsValid = RSA.verify(transactionHash, this.signatureTo, receiverKey);
-        boolean adequateBalance = Account.getBalance(this.from) >= this.value;
+        boolean senderSignatureIsValid = RSA.verify(this.toString(), this.signatureFrom, senderKey);
+        boolean receiverSignatureIsValid = RSA.verify(this.toString(), this.signatureTo, receiverKey);
+        boolean adequateBalance = Account.getBalance(this.fromId) >= this.value;
         return senderSignatureIsValid && receiverSignatureIsValid && adequateBalance;
      }
 
@@ -114,15 +122,41 @@ public class Transaction implements Serializable{
 
     public void setSignatureTo(String signature) { this.signatureTo = signature; }
 
+    public String getFromId() {
+        return this.fromId;
+    }
 
+    public void setFromId(String fromId) {
+        this.fromId = fromId;
+    }
+
+    public String getToId() {
+        return this.toId;
+    }
+
+    public void setToId(String toId) {
+        this.toId = toId;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Transaction){
+            return this.toString().equals(((Transaction)o).toString());
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         String info = "";
-        info += "ID: "+ this.id;
-        info += "\nFrom: "+ this.from;
-        info += "\nTo: "+ this.to;
-        info += "\nValue: "+ this.value;
-        info += "\nReward: "+ this.reward;
+        info += "\nID: "+ this.id;
+        info += "\tFrom: "+ this.fromId;
+        info += "\tTo: "+ this.toId;
+        info += "\tValue: "+ this.value;
+        info += "\tReward: "+ this.reward;
         return info;
     }
+
+
 
 }

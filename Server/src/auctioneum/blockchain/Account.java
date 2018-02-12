@@ -1,5 +1,7 @@
 package auctioneum.blockchain;
 
+import auctioneum.database.Database;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,8 +24,9 @@ public class Account implements Serializable{
     public Account(){}
 
 
-    public static double getBalance(String address) {
-        return 0.0; //TODO: connect to DB and return balance for this address
+    public static double getBalance(String id) {
+        Database db = new Database();
+        return db.getBalance(id,false);
     }
 
 

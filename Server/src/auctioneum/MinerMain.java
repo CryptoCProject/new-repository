@@ -11,9 +11,9 @@ public class MinerMain {
             self.startTxServer();
             self.startVdnServer();
             self.startMining();
-
         }catch (Exception e){
             e.printStackTrace();
         }
     }
+
 }

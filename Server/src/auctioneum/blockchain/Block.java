@@ -3,6 +3,8 @@ package auctioneum.blockchain;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import auctioneum.utils.hashing.SHA3_256;
 
 public class Block implements Serializable{
@@ -107,6 +109,14 @@ public class Block implements Serializable{
         this.transactions = transactions;
     }
 
+    public long getTimestamp() {
+        return this.timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
 
     public int getDifficulty() {
         return this.difficulty;
@@ -114,5 +124,20 @@ public class Block implements Serializable{
 
     public void setDifficulty(int difficulty) {
         this.difficulty = difficulty;
+    }
+
+    @Override
+    public String toString(){
+        synchronized (this.transactions) {
+            String blockInfo = "\n=======================Block " + this.number + "=======================";
+            blockInfo += "\nHash: " + this.hash;
+            blockInfo += "\nDifficulty: " + this.difficulty;
+            blockInfo += "\nMiner: " + this.beneficiary;
+            blockInfo += "\nReward: " + this.transactions.stream().mapToDouble(Transaction::getReward).sum();
+            blockInfo += "\nTransactions\n---------------------------------------";
+            blockInfo += this.transactions.stream().map(Transaction::toString).collect(Collectors.joining());
+            blockInfo += "\n======================================================\n";
+            return blockInfo;
+        }
     }
 }

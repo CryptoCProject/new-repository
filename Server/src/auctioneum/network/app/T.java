@@ -17,7 +17,7 @@ public class T {
     public static final String CERT_PATH = "C:/Users/vagelis/Documents/NetBeansProjects/SSLserver/sslsec.jks";
     public static final long OTP_VALID_TIME = 180000; // 3 minutes
     public static final long AUCTION_TIME = 20000; // 20 sec
-    public static final int NUMBER_OF_PARTICIPANTS = 1;
+    public static final int NUMBER_OF_PARTICIPANTS = 2;
     public static HashMap<Integer, OpenAuction> AUCTIONS; // auctions are on
     public static HashMap<String, Transaction> TRANSACTIONS = new HashMap(); // transactions
     
@@ -33,6 +33,7 @@ public class T {
     public static String AUCTION_WAITING = "10";
     public static String AUCTION_RUNNING = "11";
     public static String AUCTION_FINISHED = "12";
+    public static String AUCTION_EMPTY = "13";
 
     public static String SIGN_UP = " a";
     public static String SIGN_UP_CONFIRM = " b";
@@ -75,6 +76,9 @@ public class T {
     public static String BALANCE_CONFIRM = " z";
     
     public static String TRANSACTION = " 0";
+
+    public static String FINISHED_AUCTIONS = " 1";
+    public static String FINISHED_AUCTIONS_CONFIRM = " 2";
     
     public static JSONObject getJson (String ... strings) {
         JSONObject jo = new JSONObject();
@@ -82,6 +86,9 @@ public class T {
         int i = 0;
         try {
             for(;;) {
+//                for (int k=0; k<strings.length; k+=2) {
+//                    map.put(strings[k], strings[k + 1]);
+//                }
                 try {
                     map.put(strings[i], strings[i + 1]);
                     i += 2;

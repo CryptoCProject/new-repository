@@ -7,7 +7,9 @@ import auctioneum.utils.hashing.SHA3_256;
 import java.math.BigInteger;
 
 
-public class MiningProcess implements Runnable{
+public class MiningProcess {
+
+    private Miner owner;
 
     private boolean running;
 
@@ -15,18 +17,34 @@ public class MiningProcess implements Runnable{
 
     private int difficulty;
 
+    private boolean solved;
 
-    public MiningProcess(Block block,int difficulty){
+
+    public MiningProcess(Miner owner ,Block block,int difficulty){
+        this.owner = owner;
         this.block = block;
         this.difficulty = difficulty;
         this.running = true;
+        this.solved = false;
     }
 
 
-    @Override
     public void run() {
-        while (this.running && this.count("0", SHA3_256.hash(block.getData())) != this.difficulty){
-            this.block.setNonce(this.block.getNonce().add(BigInteger.ONE));
+        try {
+            System.out.println("Started new mining process for block at time: "+block.getTimestamp());
+            while (this.running && this.count("0", SHA3_256.hash(block.getData())) != this.difficulty){
+                this.block.setNonce(this.block.getNonce().add(BigInteger.ONE));
+                System.out.println(this.block.getNonce());
+            }
+            this.block.setHash(SHA3_256.hash(block.getData()));
+            this.solved = true;
+            this.running = false;
+            System.out.println("Solved block: "+this.block.getHash());
+            System.out.println("Nonce value: "+this.block.getNonce());
+            this.owner.addBlock(this.block);
+            System.out.println(block);
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -63,6 +81,22 @@ public class MiningProcess implements Runnable{
 
     public void setDifficulty(int difficulty) {
         this.difficulty = difficulty;
+    }
+
+    public boolean isRunning() {
+        return this.running;
+    }
+
+    public void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public boolean isSolved() {
+        return this.solved;
+    }
+
+    public void setSolved(boolean solved) {
+        this.solved = solved;
     }
 
 }

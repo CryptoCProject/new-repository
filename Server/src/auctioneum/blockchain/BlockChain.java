@@ -7,6 +7,9 @@ public class BlockChain {
 
     private Stack<Block> blocks;
 
+    public BlockChain(){
+        this.blocks = new Stack<>();
+    }
 
     public BlockChain(Stack<Block> blocks){
         this.blocks = blocks;
@@ -16,7 +19,7 @@ public class BlockChain {
         this.blocks.push(block);
     }
 
-    public int size(){return this.blocks.get(0).getNumber()+1;}
+    public int size(){return (blocks.size()>0)? this.blocks.get(0).getNumber()+1 : 0;}
 
     //if there are new blocks take them and validate them(for miners)
     public List<Block> diff(BlockChain other){
@@ -37,5 +40,14 @@ public class BlockChain {
 
     public void setBlocks(Stack<Block> blocks) {
         this.blocks = blocks;
+    }
+
+    @Override
+    public String toString(){
+        String blockchain = "";
+        for (Block block: this.blocks){
+            blockchain+=block.toString();
+        }
+        return blockchain;
     }
 }

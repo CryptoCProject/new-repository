@@ -35,6 +35,8 @@ public class ConnectionService implements Runnable{
             ObjectInputStream ois = new ObjectInputStream(this.connection.getInputStream());
             Request request = (Request)ois.readObject();
             String pkToString = request.getParams().get(0);
+            Integer txPort = Integer.parseInt(request.getParams().get(1));
+            Integer vdsPort = Integer.parseInt(request.getParams().get(2));
             PublicKey publicKey = RSA.getPublicKeyFromString(pkToString);
             if (RSA.verify(Request.CONNECT,request.getServiceType(),publicKey)){
                 ObjectOutputStream oos = new ObjectOutputStream(this.connection.getOutputStream());
@@ -51,19 +53,17 @@ public class ConnectionService implements Runnable{
                     oos.flush();
                     oos.writeObject(account);
                     oos.flush();
-                    //Add IP to advertised peers
-                    ((Regulator)this.owner).addPeer(this.connection.getInetAddress(), account);
-                    
                     //Update peers Service
-                    int nodesKept = ((Regulator)this.owner).getAdvertisedPeers2().size();
+                    int nodesKept = ((Regulator)this.owner).getAdvertisedPeers().size();
                     int peersToSend = nodesKept > NODES_THRES_DOWN ? (int) (0.1 * nodesKept) : nodesKept;
                     oos.writeObject(peersToSend);
                     oos.flush();
                     for (int i = 0; i < peersToSend; i++) {
-                        //oos.writeObject(((Regulator)this.owner).getAdvertisedPeers().values().toArray()[i]);
-                        oos.writeObject(((Regulator)this.owner).getAdvertisedPeers2().toArray()[i]);
+                        oos.writeObject(((Regulator)this.owner).getAdvertisedPeers().toArray()[i]);
                         oos.flush();
                     }
+                    //Add Node to advertised peers
+                    ((Regulator)this.owner).addPeer(this.connection.getInetAddress(), account, txPort,vdsPort);
                     oos.close();
                 }
             }

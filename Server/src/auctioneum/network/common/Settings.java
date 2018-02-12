@@ -34,7 +34,7 @@ public class Settings {
 
     static {
         try {
-            REGULATOR_IP = InetAddress.getByName("10.25.184.65");
+            REGULATOR_IP = InetAddress.getLocalHost();
             //REGULATOR_IP = InetAddress.getByName("zafeiratosv.ddns.net");
         }catch (UnknownHostException e){
             e.printStackTrace();

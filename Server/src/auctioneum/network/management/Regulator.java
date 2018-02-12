@@ -18,17 +18,17 @@ import java.util.TreeMap;
 /** Responsible for connections,updates in the network **/
 public class Regulator extends Node{
 
-    private ArrayList<Node> advertisedPeers2;
+    private ArrayList<Node> advertisedPeers;
     
-    private Map<Integer,HashSet<Node>> advertisedPeers;
+//    private Map<Integer,HashSet<Node>> advertisedPeers;
 
     private Server connectionServer;
     
     private Server registrationServer;
     
     public Regulator(){
-        this.advertisedPeers2 = new ArrayList();
-        advertisedPeers = new TreeMap<>();
+        this.advertisedPeers = new ArrayList();
+//        advertisedPeers = new TreeMap<>();
         connectionServer = new Server<ConnectionService>(this,Settings.CONNECTION_PORT,"ConnectionServer",ConnectionService.class);
         registrationServer = new Server<RegisterService>(this,Settings.REGISTRATION_PORT,"RegistrationServer",RegisterService.class);
         Thread connectionService = new Thread(connectionServer);
@@ -38,13 +38,13 @@ public class Regulator extends Node{
     }
 
 
-    public void addPeer(InetAddress ip, Account ac){
+    public void addPeer(InetAddress ip, Account ac, int txPort, int vdsPort){
         Node peer = new Node();
         peer.setIp(ip);
         peer.setAccount(ac);
-        peer.setTransactionsPort(Settings.TRANSACTIONS_PORT);
-        peer.setValidationsPort(Settings.VALIDATIONS_PORT);
-        this.advertisedPeers2.add(peer);
+        peer.setTransactionsPort(txPort);
+        peer.setValidationsPort(vdsPort);
+        this.advertisedPeers.add(peer);
 //        if(this.advertisedPeers.containsKey(0)){
 //            this.advertisedPeers.get(0).add(peer);
 //        }
@@ -55,29 +55,29 @@ public class Regulator extends Node{
 //        }
     }
     
-    public int hasPeer(Node peer){
-        for(Map.Entry<Integer,HashSet<Node>> entry : this.advertisedPeers.entrySet()){
-            if(entry.getValue().contains(peer)){
-                return entry.getKey();
-            }
-        }
-        return -1;
-    }
+//    public int hasPeer(Node peer){
+//        for(Map.Entry<Integer,HashSet<Node>> entry : this.advertisedPeers.entrySet()){
+//            if(entry.getValue().contains(peer)){
+//                return entry.getKey();
+//            }
+//        }
+//        return -1;
+//    }
     
     
 
     //public void
 
-    public Map<Integer,HashSet<Node>> getAdvertisedPeers() {
-        return this.advertisedPeers;
-    }
-
-    public void setAdvertisedPeers(Map<Integer,HashSet<Node>> advertisedPeers) {
-        this.advertisedPeers = advertisedPeers;
-    }
+//    public Map<Integer,HashSet<Node>> getAdvertisedPeers() {
+//        return this.advertisedPeers;
+//    }
+//
+//    public void setAdvertisedPeers(Map<Integer,HashSet<Node>> advertisedPeers) {
+//        this.advertisedPeers = advertisedPeers;
+//    }
     
-    public ArrayList<Node> getAdvertisedPeers2() {
-        return this.advertisedPeers2;
+    public ArrayList<Node> getAdvertisedPeers() {
+        return this.advertisedPeers;
     }
     
 //   public void close() {
